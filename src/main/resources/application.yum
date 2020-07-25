@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    initial-size: 10
+    max-active: 20
+    max-idle: 8
+    min-idle: 8
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/wechat_service
+    username: root
+  jpa:
+    datebase: MYSQL
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQL5Dialect
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    show-sql: true
