@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class BaseService {
@@ -52,7 +50,7 @@ public class BaseService {
 		JSONObject sortJSON = paramJSON.getJSONObject("sort");		
 		String direction = sortJSON.getString("direction");
 		JSONArray properties = sortJSON.getJSONArray("properties");
-		Sort sort = new Sort(parseDirection(direction), getSortProperties(properties));
+		Sort sort = Sort.by(parseDirection(direction), getSortProperties(properties));
 		return PageRequest.of(page, size, sort);
 	}
 	
@@ -69,13 +67,12 @@ public class BaseService {
 		return Direction.ASC;
 	}
 	
-	private List<String> getSortProperties(JSONArray properties){
-		List<String> sortProperties = new ArrayList<String>();
+	private String[] getSortProperties(JSONArray properties){
+		String[] sortProperties = new String[properties.size()];
 		for(int i = 0; i < properties.size(); i++) {
-			JSONObject jsonObj = properties.getJSONObject(i);			
-			sortProperties.add(jsonObj.getString("property"));
+			JSONObject jsonObj = properties.getJSONObject(i);
+			sortProperties[i] = jsonObj.getString("property");
 		}
-		
 		return sortProperties;
 	}
 	

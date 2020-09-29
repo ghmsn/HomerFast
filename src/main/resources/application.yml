@@ -1,13 +1,19 @@
+# Tomcat
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8088
+
 spring:
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     initial-size: 10
     max-active: 20
     max-idle: 8
     min-idle: 8
-    password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/wechat_service
-    username: root
+    url: jdbc:mysql://guhm.vicp.cc:63306/wechat_service
+    username: wechat
+    password: Wechat@123456
   jpa:
     datebase: MYSQL
     hibernate:
@@ -15,3 +21,8 @@ spring:
       dialect: org.hibernate.dialect.MySQL5Dialect
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
     show-sql: true
+wcs:
+  wxqy:
+    corpid: test
+    secret: test
+    agentid: test
