@@ -22,6 +22,21 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<druid.version>1.1.9</druid.version>
+		<fastjson.version>1.2.73</fastjson.version>
+		<shiro.spring.version>1.4.0</shiro.spring.version>
+		<shiro.ehcache.version>1.2.2</shiro.ehcache.version>
+		<commons-fileupload.version>1.3.1</commons-fileupload.version>
+		<kaptcha.version>0.0.9</kaptcha.version>
+		<commons-httpclient.version>3.1</commons-httpclient.version>
+		<aliyun-java-sdk-core.version>4.4.3</aliyun-java-sdk-core.version>
+		<aliyun-java-sdk-dysmsapi.version>1.1.0</aliyun-java-sdk-dysmsapi.version>
+		<aliyun-java-sdk-cloudauth.version>2.0.0</aliyun-java-sdk-cloudauth.version>
+		<hutool-all.version>4.5.1</hutool-all.version>
+		<swagger.version>3.0.0</swagger.version>
+		<commons-lang3.version>3.11</commons-lang3.version>
+		<kevinsawicki-http-request.version>6.0</kevinsawicki-http-request.version>
+		<apache-httpclient>4.5.12</apache-httpclient>
 	</properties>
 
 	<dependencies>
@@ -37,6 +52,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-boot-starter</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>mysql</groupId>
@@ -51,7 +71,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.49</version>
+			<version>${fastjson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -59,14 +79,19 @@
 			<version>3.1</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${apache-httpclient}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.kevinsawicki</groupId>
 			<artifactId>http-request</artifactId>
-			<version>5.6</version>
+			<version>${kevinsawicki-http-request.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
+			<version>${commons-lang3.version}</version>
 		</dependency>
 	</dependencies>
 
