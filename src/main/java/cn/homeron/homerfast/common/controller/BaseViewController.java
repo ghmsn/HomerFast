@@ -1,9 +1,9 @@
 package cn.homeron.homerfast.common.controller;
 
 import cn.homeron.homerfast.common.bean.BaseBean;
-import cn.homeron.homerfast.common.bean.SepcCountParameter;
-import cn.homeron.homerfast.common.bean.SepcListParameter;
-import cn.homeron.homerfast.common.bean.SepcPageParameter;
+import cn.homeron.homerfast.common.bean.SpecCountParameter;
+import cn.homeron.homerfast.common.bean.SpecListParameter;
+import cn.homeron.homerfast.common.bean.SpecPageParameter;
 import cn.homeron.homerfast.common.service.BaseService;
 import cn.homeron.homerfast.common.utils.R;
 import com.alibaba.fastjson.JSON;
@@ -13,10 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * ViewController基类
@@ -32,46 +29,39 @@ public class BaseViewController<S extends BaseService, T extends BaseBean> exten
     protected S service;
 
     @ApiOperation(value = "查询全部数据", notes = "查询全部数据")
-    @RequestMapping(value = "/getAll", method = {RequestMethod.GET})
+    @GetMapping(value = "/getAll")
     public R getAll() {
-
         return R.ok().put("data", service.getAll());
     }
 
     @ApiOperation(value = "查询全部Count", notes = "查询全部Count")
-    @RequestMapping(value = "/getAllCount", method = {RequestMethod.GET})
+    @GetMapping(value = "/getAllCount")
     public String getAllCount() {
         return String.valueOf(service.getAllCount());
     }
 
     @ApiOperation(value = "根据主键查询数据", notes = "根据主键查询数据")
-    @ApiImplicitParam(name = "id", value = "业务表编码", required = true, dataType = "String")
-    @RequestMapping(value = "/{id}", method = {RequestMethod.GET})
-    public R getOne(@PathVariable(value = "id") Object id) {
+    @ApiImplicitParam(name = "id", value = "业务表编码", required = true, dataType = "Long")
+    @GetMapping(value = "/{id}")
+    public R getOne(@PathVariable(value = "id") Long id) {
         return R.ok().put("data", service.getById(id));
     }
 
     @ApiOperation(value = "根据jsonParam查询Page数据", notes = "根据jsonParam查询Page数据")
-    @RequestMapping(value = "/getAllBySepc", method = {RequestMethod.POST})
-    public R getAllBySepc(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SepcPageParameter jsonParam) {
-        return R.ok().put("data", service.getAllBySepc((JSONObject) JSON.toJSON(jsonParam)));
+    @PostMapping(value = "/getAllBySpec")
+    public R getAllBySpec(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SpecPageParameter jsonParam) {
+        return R.ok().put("data", service.getAllBySpec((JSONObject) JSON.toJSON(jsonParam)));
     }
 
     @ApiOperation(value = "根据jsonParam查询List数据", notes = "根据jsonParam查询List数据")
-    @RequestMapping(value = "/getAllListBySepc", method = {RequestMethod.POST})
-    public R getAllListBySepc(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SepcListParameter jsonParam) {
-        return R.ok().put("data", service.getAllListBySepc((JSONObject) JSON.toJSON(jsonParam)));
+    @PostMapping(value = "/getAllListBySpec")
+    public R getAllListBySpec(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SpecListParameter jsonParam) {
+        return R.ok().put("data", service.getAllListBySpec((JSONObject) JSON.toJSON(jsonParam)));
     }
 
     @ApiOperation(value = "根据jsonParam查询Count", notes = "根据jsonParam查询Count")
-    @RequestMapping(value = "/getAllCountBySepc", method = {RequestMethod.POST})
-    public R getAllCountBySepc(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SepcCountParameter jsonParam) {
-        return R.ok().put("data", service.getAllCountBySepc((JSONObject) JSON.toJSON(jsonParam)));
-    }
-
-    @ApiOperation(value = "查看Bean对象", notes = "查看Bean对象")
-    @RequestMapping(value = "/viewBean", method = {RequestMethod.POST})
-    public R viewBean(@ApiParam(value = "Bean对象") @RequestBody T bean) {
-        return R.ok().put("data", bean);
+    @PostMapping(value = "/getAllCountBySpec")
+    public R getAllCountBySpec(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SpecCountParameter jsonParam) {
+        return R.ok().put("data", service.getAllCountBySpec((JSONObject) JSON.toJSON(jsonParam)));
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SepcCountParameter {
+public class SpecCountParameter {
     @ApiModelProperty(value = "条件查询List")
     private List<MyCriteria> criteria;
 }

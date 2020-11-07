@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +23,7 @@ import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.Optional;
  * @date 2018-09-01
  */
 @Service
+@EnableTransactionManagement
 public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 
 	@PersistenceContext
@@ -52,14 +55,17 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 		return repository.findById(id);
 	}
 
+	@Transactional
 	public void delete(ID id) {
 		repository.deleteById(id);
 	}
 
+	@Transactional
 	public <S extends T> S save(S bean) {
 		return repository.save(bean);
 	}
 
+	@Transactional
 	public <S extends T> Iterable<S> saveAll(Iterable<S> beans){
 		return repository.saveAll(beans);
 	}
@@ -105,7 +111,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 	]
 	}
 	 */
-	public long getAllCountBySepc(JSONObject jsonParam) {
+	public long getAllCountBySpec(JSONObject jsonParam) {
 		//反射找到泛型Bean的类型
 		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
 		return repository.count(new MySpec(jsonParam));
@@ -162,7 +168,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 	]
 	}
 	 */
-	public Page<T> getAllBySepc(JSONObject jsonParam) {
+	public Page<T> getAllBySpec(JSONObject jsonParam) {
 		//反射找到泛型Bean的类型
 		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
 		PageRequest pageReq = buildPageRequest(jsonParam);
@@ -218,7 +224,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 	]
 	}
 	 */
-	public List<T> getAllListBySepc(JSONObject jsonParam) {
+	public List<T> getAllListBySpec(JSONObject jsonParam) {
 		//反射找到泛型Bean的类型
 		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
 		JSONObject sortJSON = jsonParam.getJSONObject("sort");
@@ -512,14 +518,13 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 	}
 
 	private Direction parseDirection(String direction) {
-		if(StringUtils.isBlank(direction))
+		if(StringUtils.isBlank(direction)){
 			return Direction.ASC;
+		}
 
-		if("DESC".equalsIgnoreCase(direction))
+		if("DESC".equalsIgnoreCase(direction)){
 			return Direction.DESC;
-
-		if("ASC".equalsIgnoreCase(direction))
-			return Direction.ASC;
+		}
 
 		return Direction.ASC;
 	}

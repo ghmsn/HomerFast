@@ -7,6 +7,9 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * 
@@ -29,9 +32,12 @@ import javax.persistence.Table;
 @Entity
 public class CatBean extends BaseBean {
 
+	@NotBlank(message = "名字不能为空")
 	@ApiModelProperty(value = "名字")
 	private String catName;
 
+	@NotNull
+	@Min(value = 0, message = "年龄必须大于等于0")
 	@ApiModelProperty(value = "年龄")
 	private int catAge;
 

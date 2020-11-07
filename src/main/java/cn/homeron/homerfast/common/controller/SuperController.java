@@ -128,7 +128,7 @@ public class SuperController {
 		return url;
 	}*/
 
-	protected JSONObject genSepc(Integer page, Integer size, JSONArray criteria, JSONObject sort) {
+	protected JSONObject genSpec(Integer page, Integer size, JSONArray criteria, JSONObject sort) {
 
 		JSONObject jsonParam = new JSONObject();
 		if (null != page)
@@ -144,14 +144,14 @@ public class SuperController {
 		return jsonParam;
 	}
 
-	protected JSONObject genSepc(JSONArray criteria, JSONObject sort) {
+	protected JSONObject genSpec(JSONArray criteria, JSONObject sort) {
 
-		return genSepc(null, null, criteria, sort);
+		return genSpec(null, null, criteria, sort);
 	}
 
-	protected JSONObject genSepc(JSONArray criteria) {
+	protected JSONObject genSpec(JSONArray criteria) {
 
-		return genSepc(criteria, null);
+		return genSpec(criteria, null);
 	}
 
 }
