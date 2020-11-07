@@ -2,13 +2,11 @@ package cn.homeron.homerfast.biz.bean;
 
 
 import cn.homeron.homerfast.common.bean.BaseBean;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 
 /**
  * 
@@ -30,9 +28,11 @@ import javax.persistence.GenerationType;
 @Table(name = "CAT")
 @Entity
 public class CatBean extends BaseBean {
-	
+
+	@ApiModelProperty(value = "名字")
 	private String catName;
-	
+
+	@ApiModelProperty(value = "年龄")
 	private int catAge;
 
 }

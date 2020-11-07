@@ -40,6 +40,13 @@ public class BaseController<S extends BaseService, T extends BaseBean> extends B
         return R.ok(201, "Created").put("data", service.save(bean));
     }
 
+    @ApiOperation(value = "保存全部Bean对象数据", notes = "保存全部Bean对象数据")
+    @RequestMapping(value = "/saveAll", method = {RequestMethod.POST})
+    public R saveAll(@ApiParam(value = "Bean对象集合", required = true) @RequestBody Iterable<T> beans) {
+
+        return R.ok(201, "Created").put("data", service.saveAll(beans));
+    }
+
     @ApiIgnore
     @Override
     @RequestMapping(value = "/viewBean", method = {RequestMethod.POST})

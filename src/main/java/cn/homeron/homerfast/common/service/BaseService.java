@@ -60,6 +60,10 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 		return repository.save(bean);
 	}
 
+	public <S extends T> Iterable<S> saveAll(Iterable<S> beans){
+		return repository.saveAll(beans);
+	}
+
 	public long getAllCount() {
 		return repository.count();
 	}
