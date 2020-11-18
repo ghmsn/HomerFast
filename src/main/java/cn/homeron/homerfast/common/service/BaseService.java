@@ -238,19 +238,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 			Sort sort = Sort.by(parseDirection(direction), getSortProperties(properties));
 			return repository.findAll(new MySpec(jsonParam), sort);
 		}else if(null != sortsArray && !sortsArray.isEmpty()){
-			List<Sort.Order> sortsList = new ArrayList<>();
-			for(int i = 0; i < sortsArray.size(); i++){
-				JSONObject sortObj = sortsArray.getJSONObject(i);
-				if(null != sortObj){
-					String direction = sortObj.getString("direction");
-					if(StringUtils.isBlank(direction) || (StringUtils.isNotBlank(direction) && !ArrayUtils.contains(new String[]{"ASC", "DESC"}, direction.toUpperCase()))) {
-						direction = "ASC";
-					}
-					String properties = sortObj.getString("properties");
-					Sort.Order order = new Sort.Order(Direction.fromString(direction), properties).nullsLast();
-					sortsList.add(order);
-				}
-			}
+			List<Sort.Order> sortsList = getOrders(sortsArray);
 			if(!sortsList.isEmpty()){
 				return repository.findAll(new MySpec(jsonParam), Sort.by(sortsList));
 			}
@@ -319,28 +307,12 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 										.add(cb.notEqual(root.get(attribute), jsonObj.get("value")));
 								break;
 							case IN:
-								values = jsonObj.getJSONArray("values");
-								list = new ArrayList<>();
-								if (values != null && values.size() > 0) {
-									In<Object> in = cb.in(root.get(attribute));
-									for (Object value : values) {
-										in.value(value);
-									}
-									list.add(in);
-								}
+								list = getInNotInPredicates(root, cb, jsonObj, attribute);
 								p = new Predicate[list.size()];
 								predicate.getExpressions().add(cb.and(list.toArray(p)));
 								break;
 							case NOT_IN:
-								values = jsonObj.getJSONArray("values");
-								list = new ArrayList<>();
-								if (values != null && values.size() > 0) {
-									In<Object> in = cb.in(root.get(attribute));
-									for (Object value : values) {
-										in.value(value);
-									}
-									list.add(in);
-								}
+								list = getInNotInPredicates(root, cb, jsonObj, attribute);
 								p = new Predicate[list.size()];
 								predicate.getExpressions().add(cb.and(list.toArray(p)).not());
 								break;
@@ -473,6 +445,19 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 			}
 			return predicate;
 		}
+
+		private List<Predicate> getInNotInPredicates(Root<T> root, CriteriaBuilder cb, JSONObject jsonObj, String attribute) {
+			JSONArray values = jsonObj.getJSONArray("values");
+			List<Predicate> list = new ArrayList<>();
+			if (values != null && values.size() > 0) {
+				In<Object> in = cb.in(root.get(attribute));
+				for (Object value : values) {
+					in.value(value);
+				}
+				list.add(in);
+			}
+			return list;
+		}
 	}
 
 	/**
@@ -497,19 +482,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 			Sort sort = Sort.by(parseDirection(direction), getSortProperties(properties));
 			return PageRequest.of(page, size, sort);
 		}else if(null != sortsArray && !sortsArray.isEmpty()){
-			List<Sort.Order> sortsList = new ArrayList<>();
-			for(int i = 0; i < sortsArray.size(); i++){
-				JSONObject sortObj = sortsArray.getJSONObject(i);
-				if(null != sortObj){
-					String direction = sortObj.getString("direction");
-					if(StringUtils.isBlank(direction) || (StringUtils.isNotBlank(direction) && !ArrayUtils.contains(new String[]{"ASC", "DESC"}, direction.toUpperCase()))) {
-						direction = "ASC";
-					}
-					String properties = sortObj.getString("properties");
-					Sort.Order order = new Sort.Order(Direction.fromString(direction), properties).nullsLast();
-					sortsList.add(order);
-				}
-			}
+			List<Sort.Order> sortsList = getOrders(sortsArray);
 			if(!sortsList.isEmpty()){
 				return PageRequest.of(page, size, Sort.by(sortsList));
 			}
@@ -536,6 +509,23 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 			sortProperties[i] = jsonObj.getString("property");
 		}
 		return sortProperties;
+	}
+
+	private List<Sort.Order> getOrders(JSONArray sortsArray) {
+		List<Sort.Order> sortsList = new ArrayList<>();
+		for (int i = 0; i < sortsArray.size(); i++) {
+			JSONObject sortObj = sortsArray.getJSONObject(i);
+			if (null != sortObj) {
+				String direction = sortObj.getString("direction");
+				if (StringUtils.isBlank(direction) || (StringUtils.isNotBlank(direction) && !ArrayUtils.contains(new String[]{"ASC", "DESC"}, direction.toUpperCase()))) {
+					direction = "ASC";
+				}
+				String properties = sortObj.getString("properties");
+				Sort.Order order = new Sort.Order(Direction.fromString(direction), properties).nullsLast();
+				sortsList.add(order);
+			}
+		}
+		return sortsList;
 	}
 
 }
