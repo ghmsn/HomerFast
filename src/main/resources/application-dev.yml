@@ -3,17 +3,33 @@ server:
   tomcat:
     uri-encoding: UTF-8
   port: 8088
-
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    initial-size: 10
-    max-active: 20
-    max-idle: 8
-    min-idle: 8
-    url: jdbc:mysql://guhm.vicp.cc:63306/wechat_service
-    username: wechat
-    password: Wechat@123456
+    druid:
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      filters: stat,wall,log4j,config
+      initial-size: 1
+      max-active: 20
+      max-evictable-idle-time-millis: 60000
+      max-open-prepared-statements: 20
+      max-pool-prepared-statement-per-connection-size: 20
+      max-wait: 60000
+      min-evictable-idle-time-millis: 30000
+      min-idle: 1
+      password: root123456
+      pool-prepared-statements: true
+      removeAbandoned: true
+      removeAbandonedTimeout: 1800
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      url: jdbc:mysql://127.0.0.1:3306/wechat_service?serverTimezone=GMT%2B8&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+      username: root
+      validation-query: SELECT 1 FROM DUAL
+      validation-query-timeout: 5000
+    type: com.alibaba.druid.pool.DruidDataSource
   jpa:
     datebase: MYSQL
     hibernate:
