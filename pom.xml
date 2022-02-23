@@ -137,6 +137,11 @@
 			<artifactId>druid</artifactId>
 			<version>${druid.version}</version>
 		</dependency>
+		<!--引入sleuth链路追踪的可视化观察界面zipkin,因为zipkin里引入了sleuth，所以不需要再单独引入sleuth-->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-zipkin</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -49,6 +49,15 @@ spring:
     password:
     port: 6379
     timeout: 6000ms
+  # 链路跟踪
+  zipkin:
+    base-url: http://127.0.0.1:9411/
+    discovery-client-enabled: false
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      probability: 1
 wcs:
   wxqy:
     corpid: test
