@@ -82,52 +82,6 @@ public class SuperController {
 		return JSON.toJSONStringWithDateFormat(object, format, SerializerFeature.WriteDateUseDateFormat);
 	}
 
-	/**
-	 * 
-	 * 返回 SysLog 格式对象
-	 * 
-	 * @param operateContent
-	 *            操作内容
-	 * @param memberInfo
-	 *            登陆用户
-	 * @param url
-	 *            访问路径
-	 * @param parms
-	 *            参数
-	 * @return
-	 */
-/*	protected TSysLog insertLog(String operateContent, String parms) {
-
-		Subject subject = SecurityUtils.getSubject();
-		TMemberInfo memberInfo = (TMemberInfo) subject.getPrincipal();
-
-		TSysLog sysLog = new TSysLog();
-		sysLog.setOperateTime(new Date());
-		sysLog.setOperateContent(operateContent);
-
-		sysLog.setUserName(memberInfo == null ? "" : memberInfo.getPhoneNum());
-		sysLog.setName(memberInfo == null ? "" : memberInfo.getNickname());
-		sysLog.setUserId(memberInfo == null ? "" : memberInfo.getId());
-		sysLog.setIpAddr(IpUtil.getIpAddr(request));
-
-		sysLog.setUrl(request.getRequestURI());
-
-		sysLog.setParams(parms);
-		logger.debug("记录日志:" + sysLog.toString());
-
-		return tSysLogService.save(sysLog);
-	}
-
-	protected String getRequestUrl(String defaultUrl) {
-		Subject subject = SecurityUtils.getSubject();
-		Session session = subject.getSession();
-		String url = (String) session.getAttribute(MyUserFilter.MY_SHIRO_FILTER_URL_SESSION_KEY);
-		if (StringUtils.isBlank(url)) {
-			url = defaultUrl;
-		}
-		return url;
-	}*/
-
 	protected JSONObject genSpec(Integer page, Integer size, JSONArray criteria, JSONObject sort) {
 
 		JSONObject jsonParam = new JSONObject();

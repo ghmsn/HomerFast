@@ -21,7 +21,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public R handleValidException(MethodArgumentNotValidException exception) {
-//        log.error("数据校验出错:{},异常类型:{}", exception.getMessage(), exception.getClass());
+        log.error("数据校验出错:{},异常类型:{}", exception.getMessage(), exception.getClass());
         BindingResult bindingResult = exception.getBindingResult();
         Map<String, String> errors = new HashMap<>();
         bindingResult.getFieldErrors().forEach((item) -> {
