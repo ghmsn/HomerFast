@@ -1,9 +1,10 @@
 package cn.homeron.homerfast.common.utils;
 
+import cn.hutool.core.lang.UUID;
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
