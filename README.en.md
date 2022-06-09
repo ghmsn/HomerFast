@@ -1,6 +1,6 @@
 HomerFast
 Description
-HomerFast is a Rapid development framework
+HomerFast is a Java scaffolding project
 
 Software Architecture
 Software architecture description

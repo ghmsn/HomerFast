@@ -2,7 +2,7 @@ HomerFast
 介绍 
 
 HomerFast快速开发框架
-本项目是集成了springboo的脚手架工程
+本项目是集成了springboot的脚手架工程
 
 软件架构
 软件架构说明
