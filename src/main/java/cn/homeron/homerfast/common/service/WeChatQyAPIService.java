@@ -164,10 +164,10 @@ public class WeChatQyAPIService extends BaseService {
 					"application/json;charset=UTF-8");
 			http.setDoOutput(true);
 			http.setDoInput(true);
-			System.setProperty("sun.net.client.defaultConnectTimeout", "30000");//
-			// 连接超时30秒
-			System.setProperty("sun.net.client.defaultReadTimeout", "30000"); //
-			// 读取超时30秒
+			System.setProperty("sun.net.client.defaultConnectTimeout", "120000");//
+			// 连接超时120秒
+			System.setProperty("sun.net.client.defaultReadTimeout", "120000"); //
+			// 读取超时120秒
 			http.connect();
 			OutputStream os = http.getOutputStream();
 			os.write(json.getBytes("UTF-8"));// 传入参数
