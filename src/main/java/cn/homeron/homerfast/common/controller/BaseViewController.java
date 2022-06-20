@@ -49,8 +49,8 @@ public class BaseViewController<S extends BaseService, T extends BaseBean> exten
 
     @ApiOperation(value = "根据jsonParam查询Page数据", notes = "根据jsonParam查询Page数据")
     @PostMapping(value = "/getAllBySpec")
-    public R getAllBySpec(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SpecPageParameter jsonParam) {
-        return R.ok().put("data", service.getAllBySpec((JSONObject) JSON.toJSON(jsonParam)));
+    public R getAllBySpec(@ApiParam(value = "BaseParameter对象", required = true) @RequestBody SpecPageParameter specPageParameter) {
+        return R.ok().put("data", service.getAllBySpec(specPageParameter));
     }
 
     @ApiOperation(value = "根据jsonParam查询List数据", notes = "根据jsonParam查询List数据")

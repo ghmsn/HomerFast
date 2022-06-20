@@ -1,8 +1,12 @@
 package cn.homeron.homerfast.common.service;
 
+import cn.homeron.homerfast.common.bean.MySort;
+import cn.homeron.homerfast.common.bean.MySorts;
+import cn.homeron.homerfast.common.bean.SpecPageParameter;
 import cn.homeron.homerfast.common.enmu.CriteriaOperator;
 import cn.homeron.homerfast.common.repository.BaseRepository;
 import cn.homeron.homerfast.common.utils.GenericsUtils;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.ArrayUtils;
@@ -15,9 +19,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
@@ -39,9 +42,6 @@ import java.util.Optional;
 @Service
 @EnableTransactionManagement
 public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
-
-	@PersistenceContext
-	protected EntityManager em;
 
 	@Autowired
 	protected R repository;
@@ -173,6 +173,19 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
 		PageRequest pageReq = buildPageRequest(jsonParam);
 		return repository.findAll(new MySpec(jsonParam), pageReq);
+	}
+
+	/**
+	 * 重写查询service接口
+	 * @param specPageParameter
+	 * @return
+	 */
+	public Page<T> getAllBySpec(SpecPageParameter specPageParameter) {
+		//反射找到泛型Bean的类型
+		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
+		PageRequest pageReq = buildPageRequest(specPageParameter);
+		// TODO 修改到这里了
+		return repository.findAll(new MySpec((JSONObject) JSON.toJSON(specPageParameter)), pageReq);
 	}
 
 	/**
@@ -463,6 +476,36 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 	/**
 	 * 建立分页排序请求
 	 *
+	 * @param specPageParameter
+	 * @return
+	 *
+	 */
+	protected PageRequest buildPageRequest(SpecPageParameter specPageParameter) {
+
+		Integer page = specPageParameter.getPage();
+		Integer size = specPageParameter.getSize();
+		if(null == page || null == size){
+			throw new RuntimeException("page and size must not null!");
+		}
+		MySort mySort = specPageParameter.getSort();
+		List<MySorts> sortsArray = specPageParameter.getSorts();
+		if (null != mySort) {
+			String direction = mySort.getDirection();
+			List<String> properties = mySort.getProperties();
+			Sort sort = Sort.by(parseDirection(direction), getSortProperties(properties));
+			return PageRequest.of(page, size, sort);
+		}else if(!CollectionUtils.isEmpty(sortsArray)){
+			List<Sort.Order> sortsList = getOrders(sortsArray);
+			if(!sortsList.isEmpty()){
+				return PageRequest.of(page, size, Sort.by(sortsList));
+			}
+		}
+		return PageRequest.of(page, size);
+	}
+
+	/**
+	 * 建立分页排序请求
+	 *
 	 * @param jsonParam
 	 * @return
 	 *
@@ -511,6 +554,14 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 		return sortProperties;
 	}
 
+	private String[] getSortProperties(List<String> properties){
+		String[] sortProperties = new String[properties.size()];
+		for(int i = 0; i < properties.size(); i++) {
+			sortProperties[i] = properties.get(i);
+		}
+		return sortProperties;
+	}
+
 	private List<Sort.Order> getOrders(JSONArray sortsArray) {
 		List<Sort.Order> sortsList = new ArrayList<>();
 		for (int i = 0; i < sortsArray.size(); i++) {
@@ -521,6 +572,23 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 					direction = "ASC";
 				}
 				String properties = sortObj.getString("properties");
+				Sort.Order order = new Sort.Order(Direction.fromString(direction), properties).nullsLast();
+				sortsList.add(order);
+			}
+		}
+		return sortsList;
+	}
+
+	private List<Sort.Order> getOrders(List<MySorts> sortsArray) {
+		List<Sort.Order> sortsList = new ArrayList<>();
+		for (int i = 0; i < sortsArray.size(); i++) {
+			MySorts mySorts = sortsArray.get(i);
+			if (null != mySorts) {
+				String direction = mySorts.getDirection();
+				if (StringUtils.isBlank(direction) || (StringUtils.isNotBlank(direction) && !ArrayUtils.contains(new String[]{"ASC", "DESC"}, direction.toUpperCase()))) {
+					direction = "ASC";
+				}
+				String properties = mySorts.getProperties();
 				Sort.Order order = new Sort.Order(Direction.fromString(direction), properties).nullsLast();
 				sortsList.add(order);
 			}
