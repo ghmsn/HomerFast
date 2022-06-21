@@ -1,5 +1,6 @@
 package cn.homeron.homerfast.common.service;
 
+import cn.homeron.homerfast.common.bean.MyCriteria;
 import cn.homeron.homerfast.common.bean.MySort;
 import cn.homeron.homerfast.common.bean.MySorts;
 import cn.homeron.homerfast.common.bean.SpecPageParameter;
@@ -185,7 +186,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 		clz = GenericsUtils.getSuperClassGenricType(getClass(),1);
 		PageRequest pageReq = buildPageRequest(specPageParameter);
 		// TODO 修改到这里了
-		return repository.findAll(new MySpec((JSONObject) JSON.toJSON(specPageParameter)), pageReq);
+		return repository.findAll(new MySpecObj(specPageParameter), pageReq);
 	}
 
 	/**
@@ -463,6 +464,236 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 			JSONArray values = jsonObj.getJSONArray("values");
 			List<Predicate> list = new ArrayList<>();
 			if (values != null && values.size() > 0) {
+				In<Object> in = cb.in(root.get(attribute));
+				for (Object value : values) {
+					in.value(value);
+				}
+				list.add(in);
+			}
+			return list;
+		}
+	}
+
+	/**
+	 * 建立查询条件
+	 */
+	protected class MySpecObj implements Specification<T> {
+
+		private static final long serialVersionUID = 1L;
+
+		private SpecPageParameter specPageParameter;
+
+		MySpecObj(SpecPageParameter specPageParameter) {
+			this.specPageParameter = specPageParameter;
+		}
+
+		@Override
+		public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+
+			Predicate predicate = cb.conjunction();
+			List<MyCriteria> criterias = specPageParameter.getCriteria();
+			criterias.stream().forEach(criteria->{
+				String attribute = criteria.getAttribute();
+				String operator = criteria.getOperator();
+				if (StringUtils.isNotBlank(attribute) && StringUtils.isNotBlank(operator)) {
+					Field attributeField;
+					try{
+						attributeField = clz.getDeclaredField(attribute);
+						attributeField.setAccessible(true);
+					}catch (NoSuchFieldException ex){
+						try {
+							Class<?> superClz = clz.getSuperclass();
+							attributeField = superClz.getDeclaredField(attribute);
+							attributeField.setAccessible(true);
+						}catch (NoSuchFieldException e){
+							throw new RuntimeException("attribute (" + attribute + ") not found in JavaBean!");
+						}
+					}
+					JSONArray values;
+					String strValue;
+					List<Predicate> list;
+					Predicate[] p;
+					CriteriaOperator criteriaOperator = CriteriaOperator.getEnumByOperator(operator);
+					if (null != criteriaOperator) {
+						switch (criteriaOperator) {
+							case LIKE:
+								predicate.getExpressions()
+										.add(cb.like(root.get(attribute), "%" + criteria.getValue() + "%"));
+								break;
+							case NOT_LIKE:
+								predicate.getExpressions().add(
+										cb.notLike(root.get(attribute), "%" + criteria.getValue() + "%"));
+								break;
+							case EQUAL:
+								predicate.getExpressions()
+										.add(cb.equal(root.get(attribute), criteria.getValue()));
+								break;
+							case NOT_EQUAL:
+							case NOT_EQUAL2:
+								predicate.getExpressions()
+										.add(cb.notEqual(root.get(attribute), criteria.getValue()));
+								break;
+							case IN:
+								list = getInNotInPredicates(root, cb, criteria, attribute);
+								p = new Predicate[list.size()];
+								predicate.getExpressions().add(cb.and(list.toArray(p)));
+								break;
+							case NOT_IN:
+								list = getInNotInPredicates(root, cb, criteria, attribute);
+								p = new Predicate[list.size()];
+								predicate.getExpressions().add(cb.and(list.toArray(p)).not());
+								break;
+							case BETWEEN:
+								values = (JSONArray)JSON.toJSON(criteria.getValues());
+								if (values != null && values.size() == 2) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.between(root.get(attribute), values.getDate(0), values.getDate(1)));
+									}else{
+										predicate.getExpressions().add(cb.between(root.get(attribute), values.getString(0), values.getString(1)));
+									}
+								}else{
+									throw new RuntimeException("label values must have two values!");
+								}
+								break;
+							case NOT_BETWEEN:
+								values = (JSONArray)JSON.toJSON(criteria.getValues());
+								if (values != null && values.size() == 2) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.between(root.get(attribute), values.getDate(0), values.getDate(1)).not());
+									}else{
+										predicate.getExpressions().add(cb.between(root.get(attribute), values.getString(0), values.getString(1)).not());
+									}
+								}else{
+									throw new RuntimeException("label values must have two values!");
+								}
+								break;
+							case GREATER_THAN:
+								strValue = criteria.getValue();
+								JSONObject json = JSON.parseObject(strValue);
+								if (StringUtils.isNotBlank(strValue)) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getDate("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Integer")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getInteger("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Double")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getDouble("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Short")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getShort("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Long")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getLong("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Float")){
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getFloat("value")));
+									}else{
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), strValue));
+									}
+								}else{
+									throw new RuntimeException("label value must not null!");
+								}
+								break;
+							case GREATER_THAN_OR_EQUAL_TO:
+								strValue = criteria.getValue();
+								JSONObject json1 = JSON.parseObject(strValue);
+								if (StringUtils.isNotBlank(strValue)) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getDate("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Integer")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getInteger("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Double")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getDouble("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Short")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getShort("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Long")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getLong("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Float")){
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), json1.getFloat("value")));
+									}else{
+										predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get(attribute), strValue));
+									}
+								}else{
+									throw new RuntimeException("label value must not null!");
+								}
+								break;
+							case LESS_THAN:
+								strValue = criteria.getValue();
+								JSONObject json2 = JSON.parseObject(strValue);
+								if (StringUtils.isNotBlank(strValue)) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getDate("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Integer")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getInteger("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Double")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getDouble("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Short")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getShort("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Long")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getLong("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Float")){
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), json2.getFloat("value")));
+									}else{
+										predicate.getExpressions().add(cb.lessThan(root.get(attribute), strValue));
+									}
+								}else{
+									throw new RuntimeException("label value must not null!");
+								}
+								break;
+							case LESS_THAN_OR_EQUAL_TO:
+								strValue = criteria.getValue();
+								JSONObject json3 = JSON.parseObject(strValue);
+								if (StringUtils.isNotBlank(strValue)) {
+									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getDate("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Integer")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getInteger("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Double")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getDouble("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Short")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getShort("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Long")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getLong("value")));
+									}else if(attributeField.getGenericType().toString().equals("class java.lang.Float")){
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), json3.getFloat("value")));
+									}else{
+										predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get(attribute), strValue));
+									}
+								}else{
+									throw new RuntimeException("label value must not null!");
+								}
+								break;
+							case IS_NULL:
+								predicate.getExpressions().add(cb.isNull(root.get(attribute)));
+								break;
+							case IS_NOT_NULL:
+								predicate.getExpressions().add(cb.isNotNull(root.get(attribute)));
+								break;
+
+							default:
+								throw new RuntimeException("criteria operator not support!");
+						}
+					} else {
+						throw new RuntimeException("criteria operator error!");
+					}
+				}
+			});
+			return predicate;
+		}
+
+		private List<Predicate> getInNotInPredicates(Root<T> root, CriteriaBuilder cb, JSONObject jsonObj, String attribute) {
+			JSONArray values = jsonObj.getJSONArray("values");
+			List<Predicate> list = new ArrayList<>();
+			if (values != null && values.size() > 0) {
+				In<Object> in = cb.in(root.get(attribute));
+				for (Object value : values) {
+					in.value(value);
+				}
+				list.add(in);
+			}
+			return list;
+		}
+
+		private List<Predicate> getInNotInPredicates(Root<T> root, CriteriaBuilder cb, MyCriteria criteria, String attribute) {
+			List<String> values = criteria.getValues();
+			List<Predicate> list = new ArrayList<>();
+			if (!CollectionUtils.isEmpty(values)) {
 				In<Object> in = cb.in(root.get(attribute));
 				for (Object value : values) {
 					in.value(value);
