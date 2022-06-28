@@ -6,6 +6,7 @@ import cn.homeron.homerfast.common.bean.MySorts;
 import cn.homeron.homerfast.common.bean.SpecPageParameter;
 import cn.homeron.homerfast.common.enmu.CriteriaOperator;
 import cn.homeron.homerfast.common.repository.BaseRepository;
+import cn.homeron.homerfast.common.utils.DatetimeUtil;
 import cn.homeron.homerfast.common.utils.GenericsUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -544,12 +545,12 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 								predicate.getExpressions().add(cb.and(list.toArray(p)).not());
 								break;
 							case BETWEEN:
-								values = (JSONArray)JSON.toJSON(criteria.getValues());
-								if (values != null && values.size() == 2) {
+								List<String> criteriaValues = criteria.getValues();
+								if (criteriaValues.size() == 2) {
 									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
-										predicate.getExpressions().add(cb.between(root.get(attribute), values.getDate(0), values.getDate(1)));
+										predicate.getExpressions().add(cb.between(root.get(attribute), DatetimeUtil.parseTime(criteriaValues.get(0)), DatetimeUtil.parseTime(criteriaValues.get(1))));
 									}else{
-										predicate.getExpressions().add(cb.between(root.get(attribute), values.getString(0), values.getString(1)));
+										predicate.getExpressions().add(cb.between(root.get(attribute), String.valueOf(criteriaValues.get(0)), String.valueOf(criteriaValues.get(1))));
 									}
 								}else{
 									throw new RuntimeException("label values must have two values!");
