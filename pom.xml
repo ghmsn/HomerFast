@@ -36,7 +36,7 @@
 		<swagger.version>3.0.0</swagger.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 		<kevinsawicki-http-request.version>6.0</kevinsawicki-http-request.version>
-		<apache-httpclient>4.5.12</apache-httpclient>
+		<apache-httpclient>4.5.13</apache-httpclient>
 	</properties>
 
 	<dependencies>
