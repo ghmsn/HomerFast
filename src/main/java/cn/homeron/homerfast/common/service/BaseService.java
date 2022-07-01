@@ -512,6 +512,7 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 					}
 					JSONArray values;
 					String strValue;
+					List<String> strValues;
 					List<Predicate> list;
 					Predicate[] p;
 					CriteriaOperator criteriaOperator = CriteriaOperator.getEnumByOperator(operator);
@@ -545,24 +546,24 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 								predicate.getExpressions().add(cb.and(list.toArray(p)).not());
 								break;
 							case BETWEEN:
-								List<String> criteriaValues = criteria.getValues();
-								if (criteriaValues.size() == 2) {
+								strValues = criteria.getValues();
+								if (strValues.size() == 2) {
 									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
-										predicate.getExpressions().add(cb.between(root.get(attribute), DatetimeUtil.parseTime(criteriaValues.get(0)), DatetimeUtil.parseTime(criteriaValues.get(1))));
+										predicate.getExpressions().add(cb.between(root.get(attribute), DatetimeUtil.parseTime(strValues.get(0)), DatetimeUtil.parseTime(strValues.get(1))));
 									}else{
-										predicate.getExpressions().add(cb.between(root.get(attribute), String.valueOf(criteriaValues.get(0)), String.valueOf(criteriaValues.get(1))));
+										predicate.getExpressions().add(cb.between(root.get(attribute), String.valueOf(strValues.get(0)), String.valueOf(strValues.get(1))));
 									}
 								}else{
 									throw new RuntimeException("label values must have two values!");
 								}
 								break;
 							case NOT_BETWEEN:
-								values = (JSONArray)JSON.toJSON(criteria.getValues());
-								if (values != null && values.size() == 2) {
+								strValues = criteria.getValues();
+								if (strValues.size() == 2) {
 									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
-										predicate.getExpressions().add(cb.between(root.get(attribute), values.getDate(0), values.getDate(1)).not());
+										predicate.getExpressions().add(cb.between(root.get(attribute), DatetimeUtil.parseTime(strValues.get(0)), DatetimeUtil.parseTime(strValues.get(1))).not());
 									}else{
-										predicate.getExpressions().add(cb.between(root.get(attribute), values.getString(0), values.getString(1)).not());
+										predicate.getExpressions().add(cb.between(root.get(attribute), String.valueOf(strValues.get(0)), String.valueOf(strValues.get(1))).not());
 									}
 								}else{
 									throw new RuntimeException("label values must have two values!");
@@ -570,20 +571,19 @@ public abstract class BaseService<R extends BaseRepository<T, ID>, T, ID> {
 								break;
 							case GREATER_THAN:
 								strValue = criteria.getValue();
-								JSONObject json = JSON.parseObject(strValue);
 								if (StringUtils.isNotBlank(strValue)) {
 									if(attributeField.getGenericType().toString().equals("class java.util.Date")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getDate("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), DatetimeUtil.parseTime(strValue)));
 									}else if(attributeField.getGenericType().toString().equals("class java.lang.Integer")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getInteger("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), Integer.parseInt(strValue)));
 									}else if(attributeField.getGenericType().toString().equals("class java.lang.Double")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getDouble("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), Double.parseDouble(strValue)));
 									}else if(attributeField.getGenericType().toString().equals("class java.lang.Short")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getShort("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), Short.parseShort(strValue)));
 									}else if(attributeField.getGenericType().toString().equals("class java.lang.Long")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getLong("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), Long.parseLong(strValue)));
 									}else if(attributeField.getGenericType().toString().equals("class java.lang.Float")){
-										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), json.getFloat("value")));
+										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), Float.parseFloat(strValue)));
 									}else{
 										predicate.getExpressions().add(cb.greaterThan(root.get(attribute), strValue));
 									}
